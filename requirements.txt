@@ -1,0 +1,21 @@
+# requirements.txt
+# Dependências do projeto
+# Instale com: pip install -r requirements.txt
+
+# Selenium - Automação de navegador
+selenium==4.16.0
+
+# WebDriver Manager - Gerenciamento automático de drivers
+webdriver-manager==4.0.1
+
+# PyYAML - Leitura de arquivos YAML
+PyYAML==6.0.1
+
+# python-dotenv - Carregamento de variáveis de ambiente
+python-dotenv==1.0.0
+
+# Requests - Para requisições HTTP (opcional)
+requests==2.31.0
+
+# Pandas - Manipulação de dados CSV (opcional)
+pandas==2.1.4

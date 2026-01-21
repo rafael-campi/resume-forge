@@ -1,0 +1,46 @@
+# config.yaml
+# Arquivo de configuração para o bot de automação do LinkedIn
+# Define parâmetros de busca, filtros e comportamento do bot
+
+search:
+  # Palavras-chave para buscar vagas
+  keywords: "Python Developer"
+  
+  # Localização desejada
+  location: "Remote"
+  
+  # Número de páginas de resultados para navegar
+  max_pages: 5
+
+filters:
+  # Palavras-chave obrigatórias no título ou descrição
+  required_keywords:
+    - "python"
+    - "backend"
+  
+  # Palavras-chave que devem ser evitadas
+  blocked_keywords:
+    - "lead"
+    - "manager"
+  
+  # Nível de experiência (entry, mid, senior)
+  experience_level:
+    - "entry"
+    - "mid"
+
+apply:
+  # Número máximo de aplicações por execução
+  max_applications: 10
+  
+  # Delay entre aplicações (em segundos)
+  delay_between_applications: 3
+  
+  # Aplicar apenas para vagas com "Easy Apply"
+  easy_apply_only: true
+
+browser:
+  # Executar navegador em modo headless (sem interface gráfica)
+  headless: false
+  
+  # Timeout para carregamento de elementos (em segundos)
+  timeout: 10
