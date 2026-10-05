@@ -9,8 +9,32 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from .filters import apply_filters
+from dataclasses import dataclass
+from typing import Any
+import re
 import time
+
+from bot.domain.vaga import Vaga
+
+
+@dataclass
+class ListedJob:
+    """Uma Vaga lida da lista de resultados, com o elemento do card para interagir."""
+    vaga: Vaga
+    element: Any
+
+
+def extract_job_id(card):
+    """Lê o job id do card (atributo data-job-id ou link /jobs/view/<id>); None se não achar."""
+    job_id = card.get_attribute('data-job-id')
+    if job_id:
+        return job_id.strip()
+    try:
+        href = card.find_element(By.CSS_SELECTOR, 'a[href*="/jobs/view/"]').get_attribute('href')
+    except Exception:
+        return None
+    match = re.search(r'/jobs/view/(\d+)', href or '')
+    return match.group(1) if match else None
 
 
 def search_jobs(driver, config):
@@ -22,7 +46,7 @@ def search_jobs(driver, config):
         config (dict): Dicionário com configurações de busca
         
     Returns:
-        list: Lista de vagas encontradas que passaram pelos filtros
+        list[ListedJob]: Vagas encontradas na lista de resultados (sem filtros aplicados)
     """
     print("Buscando vagas no LinkedIn...")
     
@@ -146,24 +170,20 @@ def search_jobs(driver, config):
                 except:
                     pass
                 
-                job_data = {
-                    'title': title,
-                    'company': company,
-                    'location': location_text,
-                    'element': card
-                }
-                jobs.append(job_data)
-                print(f"  {i}. {title} - {company}")
+                job_id = extract_job_id(card)
+                if not job_id:
+                    print(f"⚠️  Vaga {i} sem job id, ignorada: {title}")
+                    continue
+
+                vaga = Vaga(job_id=job_id, title=title, company=company, location=location_text)
+                jobs.append(ListedJob(vaga=vaga, element=card))
+                print(f"  {i}. [{job_id}] {title} - {company}")
                 
             except Exception as e:
                 print(f"⚠️  Erro ao coletar dados da vaga {i}: {str(e)}")
                 continue
         
-        # Aplica filtros configurados
-        filtered_jobs = apply_filters(jobs, config)
-        
-        print(f"✓ {len(filtered_jobs)} vagas encontradas após aplicar filtros")
-        return filtered_jobs
+        return jobs
         
     except Exception as e:
         print(f"❌ Erro ao buscar vagas: {str(e)}")
@@ -174,5 +194,4 @@ def search_jobs(driver, config):
             print("📸 Screenshot salvo em: storage/debug_error.png")
         except:
             pass
-        return []
         return []

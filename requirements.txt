@@ -3,19 +3,19 @@
 # Instale com: pip install -r requirements.txt
 
 # Selenium - Automação de navegador
-selenium==4.16.0
+selenium==4.50.0
 
 # WebDriver Manager - Gerenciamento automático de drivers
-webdriver-manager==4.0.1
+webdriver-manager==4.1.2
 
 # PyYAML - Leitura de arquivos YAML
-PyYAML==6.0.1
+PyYAML==6.0.3
 
 # python-dotenv - Carregamento de variáveis de ambiente
-python-dotenv==1.0.0
+python-dotenv==1.2.4
 
-# Requests - Para requisições HTTP (opcional)
-requests==2.31.0
+# psycopg - Acesso ao Postgres
+psycopg[binary]==3.3.6
 
-# Pandas - Manipulação de dados CSV (opcional)
-pandas==2.1.4
+# pytest - Testes
+pytest==9.1.1

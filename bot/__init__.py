@@ -1,15 +1,8 @@
 """
-bot/__init__.py
-Inicializa o pacote bot e expõe os módulos principais.
-Permite importar funcionalidades do bot de forma organizada.
+bot
+Bot de candidaturas Easy Apply do LinkedIn, em três camadas:
+
+- bot.domain: regras do negócio (Vaga, Status, filtros); não conhece Selenium nem SQL.
+- bot.repository: a única camada que fala com o Postgres.
+- bot.linkedin: a única camada que fala com o Selenium e conhece seletores.
 """
-
-from .browser import Browser
-from .login import login
-from .search import search_jobs
-from .apply import apply_to_jobs
-from .filters import apply_filters
-from .cookies import save_cookies, load_cookies, delete_cookies
-
-__all__ = ['Browser', 'login', 'search_jobs', 'apply_to_jobs', 'apply_filters', 
-           'save_cookies', 'load_cookies', 'delete_cookies']

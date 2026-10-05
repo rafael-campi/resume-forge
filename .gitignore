@@ -5,13 +5,14 @@ __pycache__/
 *.so
 .Python
 venv/
+.venv/
 env/
 ENV/
 
 # Credenciais e dados sensíveis
 .env
 storage/linkedin_cookies.pkl
-storage/applications.csv
+storage/debug_*.png
 
 # IDE
 .vscode/
