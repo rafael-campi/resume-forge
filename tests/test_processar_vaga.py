@@ -144,3 +144,13 @@ def test_vaga_que_falhou_pode_ser_tentada_de_novo(repo, vaga):
 def test_modo_invalido_e_rejeitado(repo, vaga):
     with pytest.raises(ValueError):
         processar_vaga(vaga, repo, FakeLinkedIn(), "talvez", sempre)
+
+
+def test_vaga_sem_status_nao_vira_falhou_e_o_erro_nao_e_escondido(repo):
+    v = Vaga("9", "Python Dev", "Acme", "Remote")
+    repo.upsert_vaga(v)
+
+    with pytest.raises(Exception):
+        processar_vaga(v, repo, FakeLinkedIn(), "auto", sempre)
+
+    assert repo.current_status("9") is None

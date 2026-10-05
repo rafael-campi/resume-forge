@@ -48,14 +48,13 @@ def processar_vaga(vaga, repo, linkedin, modo, aprovar):
 
         linkedin.enviar()
         if linkedin.envio_confirmado():
-            return _registrar(repo, vaga, Status.ENVIADA)
-        return _registrar(repo, vaga, Status.FALHOU)
+            repo.record_status(vaga.job_id, Status.ENVIADA)
+            return Status.ENVIADA
+        repo.record_status(vaga.job_id, Status.FALHOU)
+        return Status.FALHOU
     except Exception as erro:
         print(f"❌ Erro ao processar [{vaga.job_id}] {vaga.title}: {erro}")
-        return _registrar(repo, vaga, Status.FALHOU)
-
-
-def _registrar(repo, vaga, alvo):
-    if can_transition(repo.current_status(vaga.job_id), alvo):
-        repo.record_status(vaga.job_id, alvo)
-    return repo.current_status(vaga.job_id)
+        if not can_transition(repo.current_status(vaga.job_id), Status.FALHOU):
+            raise  # não esconde o erro atrás de um Status que não aconteceu
+        repo.record_status(vaga.job_id, Status.FALHOU)
+        return Status.FALHOU

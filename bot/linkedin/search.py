@@ -3,10 +3,13 @@ bot/linkedin/search.py
 Busca Vagas no LinkedIn pela URL de resultados e lê os cards da lista.
 """
 
-import time
 from urllib.parse import urlencode
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+
 from bot.linkedin import parsing
+from bot.linkedin import selectors as sel
 
 SEARCH_URL = "https://www.linkedin.com/jobs/search/?"
 
@@ -31,7 +34,12 @@ def search_jobs(driver, config):
     url = build_search_url(config)
     print(f"Buscando: {url}")
     driver.get(url)
-    time.sleep(5)
+    try:
+        WebDriverWait(driver, config["browser"]["timeout"]).until(
+            lambda d: d.find_elements(By.CSS_SELECTOR, sel.CARD)
+        )
+    except Exception:
+        pass  # sem cards no prazo: o parse abaixo devolve lista vazia e avisa
 
     vagas = parsing.parse_vagas(driver.page_source)
     if not vagas:
