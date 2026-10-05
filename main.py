@@ -23,30 +23,32 @@ def load_config():
         return yaml.safe_load(file)
 
 
-def register_and_filter(repo, listed_jobs, config):
+def register_and_filter(repo, vagas_listadas, config):
     """
     Grava as Vagas encontradas, aplica os filtros e marca como filtradas as que não passaram.
+    Uma Vaga filtrada antes volta a ser vista e é reavaliada com a configuração atual.
 
     Returns:
-        list[ListedJob]: Vagas que passaram pelos filtros
+        list[VagaListada]: Vagas que passaram pelos filtros
     """
-    applied_ids = repo.applied_job_ids()
-    for listed in listed_jobs:
+    enviadas_ids = repo.enviada_job_ids()
+    for listed in vagas_listadas:
+        job_id = listed.vaga.job_id
         repo.upsert_vaga(listed.vaga)
-        if repo.current_status(listed.vaga.job_id) is None:
-            repo.record_status(listed.vaga.job_id, Status.VISTA)
+        if repo.current_status(job_id) in (None, Status.FILTRADA):
+            repo.record_status(job_id, Status.VISTA)
 
     kept = apply_filters(
-        [listed.vaga for listed in listed_jobs], config.get('filters', {}), applied_ids
+        [listed.vaga for listed in vagas_listadas], config.get('filters', {}), enviadas_ids
     )
     kept_ids = {vaga.job_id for vaga in kept}
 
-    for listed in listed_jobs:
+    for listed in vagas_listadas:
         job_id = listed.vaga.job_id
         if job_id not in kept_ids and repo.current_status(job_id) == Status.VISTA:
             repo.record_status(job_id, Status.FILTRADA)
 
-    return [listed for listed in listed_jobs if listed.vaga.job_id in kept_ids]
+    return [listed for listed in vagas_listadas if listed.vaga.job_id in kept_ids]
 
 
 def main():
@@ -73,8 +75,8 @@ def main():
 
         print("\n[ETAPA 2] Buscando vagas...")
         print("=" * 50)
-        listed_jobs = search_jobs(driver, config)
-        jobs = register_and_filter(repo, listed_jobs, config)
+        vagas_listadas = search_jobs(driver, config)
+        jobs = register_and_filter(repo, vagas_listadas, config)
         print(f"✓ {len(jobs)} vagas após aplicar filtros")
 
         print("\n[ETAPA 3] Aplicando para vagas...")

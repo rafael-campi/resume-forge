@@ -25,9 +25,11 @@ def test_enviada_e_final():
         assert not can_transition(Status.ENVIADA, destino)
 
 
-def test_vaga_filtrada_e_final():
+def test_vaga_filtrada_so_pode_voltar_a_ser_vista():
+    assert can_transition(Status.FILTRADA, Status.VISTA)
     for destino in Status:
-        assert not can_transition(Status.FILTRADA, destino)
+        if destino != Status.VISTA:
+            assert not can_transition(Status.FILTRADA, destino)
 
 
 def test_falha_pode_ser_tentada_de_novo():

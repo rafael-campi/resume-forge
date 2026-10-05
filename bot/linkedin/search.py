@@ -18,7 +18,7 @@ from bot.domain.vaga import Vaga
 
 
 @dataclass
-class ListedJob:
+class VagaListada:
     """Uma Vaga lida da lista de resultados, com o elemento do card para interagir."""
     vaga: Vaga
     element: Any
@@ -46,7 +46,7 @@ def search_jobs(driver, config):
         config (dict): Dicionário com configurações de busca
         
     Returns:
-        list[ListedJob]: Vagas encontradas na lista de resultados (sem filtros aplicados)
+        list[VagaListada]: Vagas encontradas na lista de resultados (sem filtros aplicados)
     """
     print("Buscando vagas no LinkedIn...")
     
@@ -151,9 +151,9 @@ def search_jobs(driver, config):
         for i, card in enumerate(job_cards[:10], 1):  # Limita a 10 primeiras vagas
             try:
                 # Tenta extrair informações da vaga
-                title = "Título não disponível"
-                company = "Empresa não disponível"
-                location_text = "Localização não disponível"
+                title = ""
+                company = ""
+                location_text = ""
                 
                 try:
                     title = card.find_element(By.CSS_SELECTOR, '.job-card-list__title, .job-card-container__link').text
@@ -172,12 +172,12 @@ def search_jobs(driver, config):
                 
                 job_id = extract_job_id(card)
                 if not job_id:
-                    print(f"⚠️  Vaga {i} sem job id, ignorada: {title}")
+                    print(f"⚠️  Vaga {i} sem job id, ignorada: {title or '(sem título)'}")
                     continue
 
                 vaga = Vaga(job_id=job_id, title=title, company=company, location=location_text)
-                jobs.append(ListedJob(vaga=vaga, element=card))
-                print(f"  {i}. [{job_id}] {title} - {company}")
+                jobs.append(VagaListada(vaga=vaga, element=card))
+                print(f"  {i}. [{job_id}] {title or '(sem título)'} - {company or '(sem empresa)'}")
                 
             except Exception as e:
                 print(f"⚠️  Erro ao coletar dados da vaga {i}: {str(e)}")

@@ -13,3 +13,8 @@ class Vaga:
     company: str
     location: str
     description: str = ""
+
+    @property
+    def searchable_text(self):
+        """Título e descrição em minúsculas, para os filtros de palavras-chave."""
+        return f"{self.title} {self.description}".lower()

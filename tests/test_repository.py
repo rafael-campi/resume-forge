@@ -67,7 +67,7 @@ def test_enviada_ja_registrada_nao_aceita_nova_transicao(repo):
         repo.record_status("111", Status.FORMULARIO_ABERTO)
 
 
-def test_applied_job_ids_devolve_so_as_enviadas(repo):
+def test_enviada_job_ids_devolve_so_as_enviadas(repo):
     for job_id in ("1", "2", "3"):
         repo.upsert_vaga(vaga(job_id=job_id))
         repo.record_status(job_id, Status.VISTA)
@@ -75,4 +75,13 @@ def test_applied_job_ids_devolve_so_as_enviadas(repo):
     repo.record_status("1", Status.ENVIADA)
     repo.record_status("2", Status.FORMULARIO_ABERTO)
 
-    assert repo.applied_job_ids() == {"1"}
+    assert repo.enviada_job_ids() == {"1"}
+
+
+def test_gravar_dados_vazios_nao_apaga_os_bons(repo):
+    repo.upsert_vaga(vaga(title="Python Developer", company="Acme"))
+    repo.upsert_vaga(Vaga(job_id="111", title="", company="", location=""))
+
+    gravada = repo.get_vaga("111")
+    assert gravada.title == "Python Developer"
+    assert gravada.company == "Acme"

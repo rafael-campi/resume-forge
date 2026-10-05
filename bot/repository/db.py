@@ -37,8 +37,12 @@ def migrate(conn):
     for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
         if path.stem in done:
             continue
-        conn.execute(path.read_text(encoding="utf-8"))
-        conn.execute("INSERT INTO schema_migrations (version) VALUES (%s)", (path.stem,))
-        conn.commit()
+        try:
+            conn.execute(path.read_text(encoding="utf-8"))
+            conn.execute("INSERT INTO schema_migrations (version) VALUES (%s)", (path.stem,))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
         applied.append(path.stem)
     return applied

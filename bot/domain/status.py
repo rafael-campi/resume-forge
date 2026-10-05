@@ -27,11 +27,11 @@ _TRANSITIONS = {
     Status.FORMULARIO_ABERTO: {Status.ENVIADA, Status.FALHOU, Status.REVISAO_MANUAL},
     Status.REVISAO_MANUAL: {Status.FORMULARIO_ABERTO, Status.FALHOU},
     Status.FALHOU: {Status.FORMULARIO_ABERTO},
-    Status.FILTRADA: set(),
+    Status.FILTRADA: {Status.VISTA},
     Status.ENVIADA: set(),
 }
 
 
-def can_transition(current, new):
-    """Diz se a Candidatura pode ir de `current` (None se ainda não tem Status) para `new`."""
-    return new in _TRANSITIONS[current]
+def can_transition(current, target):
+    """Diz se a Candidatura pode ir de `current` (None se ainda não tem Status) para `target`."""
+    return target in _TRANSITIONS[current]
