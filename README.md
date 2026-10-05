@@ -20,3 +20,9 @@ docker compose up -d db
 ```
 
 Os testes usam o banco `apply_jobs_test`, criado automaticamente no mesmo Postgres. Sem o Postgres no ar, os testes de banco são pulados.
+
+## Uso
+
+`python main.py` busca Vagas Easy Apply, filtra e preenche o formulário. No modo `confirmar` (padrão, `apply.mode` no `config.yaml`) o formulário fica aberto no navegador e o terminal pergunta se deve enviar; no modo `auto` o envio é automático. Uma Candidatura só vira Enviada quando o LinkedIn mostra a confirmação. Coloque o currículo no caminho de `apply.resume_path`.
+
+`python gravar.py` faz a Gravação manual de snapshots de DOM (veja `tests/fixtures/README.md`).

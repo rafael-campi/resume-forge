@@ -9,8 +9,8 @@ search:
   # Localização desejada
   location: "Remote"
   
-  # Número de páginas de resultados para navegar
-  max_pages: 5
+  # Número de páginas de resultados (ainda lido apenas como 1 página; paginação é o ticket #7)
+  max_pages: 1
 
 filters:
   # Palavras-chave obrigatórias no título ou descrição
@@ -22,14 +22,16 @@ filters:
   blocked_keywords:
     - "lead"
     - "manager"
-  
-  # Nível de experiência (entry, mid, senior)
-  experience_level:
-    - "entry"
-    - "mid"
 
 apply:
-  # Número máximo de aplicações por execução
+  # Modo de envio: "confirmar" mostra o formulário preenchido e espera sua aprovação
+  # no terminal; "auto" envia sozinho. Padrão: confirmar.
+  mode: "confirmar"
+
+  # Caminho do currículo (PDF) anexado quando o formulário pede
+  resume_path: "storage/curriculo.pdf"
+
+  # Número máximo de candidaturas enviadas por execução
   max_applications: 10
   
   # Delay entre aplicações (em segundos)
@@ -39,8 +41,11 @@ apply:
   easy_apply_only: true
 
 browser:
-  # Executar navegador em modo headless (sem interface gráfica)
+  # Executar navegador em modo headless (exige apply.mode: auto)
   headless: false
   
   # Timeout para carregamento de elementos (em segundos)
   timeout: 10
+
+  # Idioma da interface do LinkedIn (os seletores esperam português)
+  language: "pt-BR"

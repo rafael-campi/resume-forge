@@ -15,15 +15,17 @@ import os
 class Browser:
     """Classe para gerenciar o navegador Selenium"""
     
-    def __init__(self, headless=False):
+    def __init__(self, headless=False, language='pt-BR'):
         """
         Inicializa as configurações do navegador
         
         Args:
             headless (bool): Se True, executa o navegador sem interface gráfica
+            language (str): Idioma da interface (fixado em português para os seletores)
         """
         self.driver = None
         self.headless = headless
+        self.language = language
     
     def start(self):
         """
@@ -44,6 +46,7 @@ class Browser:
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--disable-gpu')
         options.add_argument('--window-size=1920,1080')
+        options.add_argument(f'--lang={self.language}')
         options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36')
         
         # Remove indicadores de automação
@@ -53,7 +56,8 @@ class Browser:
         # Prefências para parecer mais humano
         prefs = {
             "credentials_enable_service": False,
-            "profile.password_manager_enabled": False
+            "profile.password_manager_enabled": False,
+            "intl.accept_languages": self.language,
         }
         options.add_experimental_option("prefs", prefs)
         

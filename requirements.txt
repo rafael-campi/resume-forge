@@ -17,5 +17,8 @@ python-dotenv==1.2.4
 # psycopg - Acesso ao Postgres
 psycopg[binary]==3.3.6
 
+# BeautifulSoup - Leitura do HTML do LinkedIn (parsing e snapshots)
+beautifulsoup4==4.13.4
+
 # pytest - Testes
 pytest==9.1.1

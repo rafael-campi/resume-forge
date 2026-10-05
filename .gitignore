@@ -29,3 +29,7 @@ Thumbs.db
 
 # ChromeDriver cache
 .wdm/
+
+# Gravação de snapshots e currículo local
+storage/gravacao/
+storage/curriculo.pdf

@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 from bot.domain.status import Status
 from bot.domain.vaga import Vaga
 from main import register_and_filter
@@ -8,14 +6,13 @@ CONFIG = {"filters": {"required_keywords": ["python"], "blocked_keywords": ["lea
 
 
 def listed(job_id, title):
-    vaga = Vaga(job_id=job_id, title=title, company="Acme", location="Remote")
-    return SimpleNamespace(vaga=vaga, element=object())
+    return Vaga(job_id=job_id, title=title, company="Acme", location="Remote")
 
 
 def test_vaga_que_passa_nos_filtros_fica_como_vista(repo):
     kept = register_and_filter(repo, [listed("1", "Python Dev")], CONFIG)
 
-    assert [k.vaga.job_id for k in kept] == ["1"]
+    assert [k.job_id for k in kept] == ["1"]
     assert repo.current_status("1") == Status.VISTA
 
 
@@ -52,5 +49,5 @@ def test_vaga_filtrada_e_reavaliada_quando_a_configuracao_muda(repo):
     liberado = {"filters": {"required_keywords": ["python"], "blocked_keywords": []}}
     kept = register_and_filter(repo, [listed("1", "Python Tech Lead")], liberado)
 
-    assert [k.vaga.job_id for k in kept] == ["1"]
+    assert [k.job_id for k in kept] == ["1"]
     assert repo.current_status("1") == Status.VISTA
