@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTÓTIPO · Resume Forge</title>
+<!--
+  PROTÓTIPO DESCARTÁVEL. Pergunta: como deve ser a tela de revisão e o caminho até ela?
+  Premissa: ainda não existe app; HTML solto com dados inventados, estado só em memória.
+  Etapas (cabeçalho): Mestre, Vaga, Revisão, Exportar. Mestre/Vaga/Exportar são telas esboçadas.
+  Revisão tem 3 layouts: ?variant=A|B|C (seletor no topo ou setas ← →).
+  "Regenerar", "Baixar PDF" e "Editar" são stubs.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e8ecf1; --surface:#f6f8fa; --raised:#ffffff; --ink:#17233a; --muted:#5d6a7e; --rule:#c9d1dc;
+    --primary:#17233a; --on-primary:#ffffff; --good:#25765a; --warn:#a65a00; --bad:#b8402a; --mark:#f5d76e;
+    --soft:#dfe5ed; --focus:#2f6bff;
+    --ui:"Instrument Sans",system-ui,sans-serif; --serif:"Source Serif 4",Georgia,serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1622; --surface:#141d2c; --raised:#1a2538; --ink:#e8edf5; --muted:#98a6bb; --rule:#2c3a52;
+      --primary:#e8edf5; --on-primary:#0f1622; --good:#5cc4a0; --warn:#e2a24a; --bad:#f08a74; --mark:#7a6516; --soft:#223049; --focus:#7aa2ff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-padding-top:120px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--ui)}
+  h1,h2,h3,p{margin:0}
+  button{font:inherit;color:inherit;background:transparent;border:1px solid var(--rule);border-radius:6px;padding:5px 11px;cursor:pointer}
+  button:hover{background:var(--soft)}
+  button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  button.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary);font-weight:600}
+  button.primary:hover{opacity:.9}
+  button:disabled{opacity:.4;cursor:default}
+  input,textarea{font:inherit;color:inherit;background:var(--raised);border:1px solid var(--rule);border-radius:6px;padding:6px 9px}
+  .muted{color:var(--muted)} .small{font-size:13px} .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .hl{background:linear-gradient(transparent 55%,var(--mark) 55%);padding:0 1px}
+
+  /* Cabeçalho e etapas */
+  .shell{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:20px;padding:8px 18px;flex-wrap:wrap}
+  .brand{font-weight:700;letter-spacing:-.01em}
+  .steps{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+  .step{display:flex;align-items:center;gap:8px;border:0;border-radius:99px;padding:6px 14px 6px 8px;color:var(--muted)}
+  .step .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;border:1.5px solid var(--rule)}
+  .step.done .n{background:var(--good);border-color:var(--good);color:#fff}
+  .step[aria-current="step"]{background:var(--primary);color:var(--on-primary);font-weight:600}
+  .step[aria-current="step"] .n{border-color:var(--on-primary)}
+  .proto{font-size:12px;color:var(--muted);border:1px dashed var(--rule);border-radius:99px;padding:2px 10px}
+
+  /* Barra de contexto da revisão */
+  .ctx{position:sticky;top:53px;z-index:20;background:var(--surface);border-bottom:1px solid var(--rule);padding:10px 18px;display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(220px,1.6fr) auto;gap:18px;align-items:center}
+  .ctx .job{font-weight:600}
+  .meter{position:relative;height:8px;border-radius:99px;background:var(--soft);margin:6px 0 4px}
+  .meter i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--good)}
+  .meter.over i{background:var(--bad)}
+  .meter b{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+  .ctx .acts{display:flex;gap:8px}
+  @media(max-width:900px){.ctx{grid-template-columns:1fr;top:0;position:static}}
+
+  .tabs{display:flex;align-items:center;gap:10px;padding:10px 18px 0;flex-wrap:wrap}
+  .seg{display:flex;background:var(--soft);border-radius:8px;padding:3px;gap:2px}
+  .seg button{border:0;border-radius:6px;padding:5px 14px}
+  .seg button[aria-selected="true"]{background:var(--raised);font-weight:600;box-shadow:0 1px 3px #0002}
+
+  .wrap{padding:14px 18px 40px;display:grid;gap:18px;align-items:start}
+  .wrapA{grid-template-columns:minmax(320px,1fr) minmax(360px,1fr)}
+  .wrapB{grid-template-columns:230px minmax(280px,1fr) minmax(300px,380px)}
+  .wrapC{grid-template-columns:minmax(0,1fr) 280px;max-width:1120px;margin:0 auto}
+  @media(max-width:1000px){.wrapA,.wrapB,.wrapC{grid-template-columns:1fr}.sticky{position:static!important}}
+  .sticky{position:sticky;top:132px;max-height:calc(100vh - 150px);overflow:auto}
+
+  /* Seções recolhíveis */
+  details.sec{background:var(--raised);border:1px solid var(--rule);border-radius:10px;margin-bottom:10px}
+  details.sec>summary{list-style:none;cursor:pointer;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+  details.sec>summary::-webkit-details-marker{display:none}
+  details.sec>summary::before{content:"▸";margin-right:8px;color:var(--muted);transition:transform .15s}
+  details.sec[open]>summary::before{transform:rotate(90deg)}
+  details.sec>summary .cnt{margin-left:auto;font-weight:400;color:var(--muted);font-size:13px}
+  details.sec>.body{padding:0 14px 10px}
+  .row{display:flex;gap:8px;align-items:flex-start;padding:7px 4px 7px calc(4px + var(--i,0) * 18px);border-top:1px solid var(--soft)}
+  .row .txt{flex:1;min-width:0}
+  .row.off .txt{color:var(--muted);text-decoration:line-through}
+  .row.head .txt{font-weight:600}
+  .ctl{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .12s}
+  .row:hover .ctl,.row:focus-within .ctl{opacity:1}
+  @media(hover:none){.ctl{opacity:1}}
+  .ctl button{padding:2px 8px;font-size:13px}
+  .tag{display:inline-block;border-radius:4px;padding:0 6px;font-size:12px;margin-left:4px;border:1px solid var(--rule);color:var(--muted)}
+  .tag.ok{border-color:var(--good);color:var(--good)}
+  .tag.new{background:var(--mark);color:#17233a;border-color:transparent}
+  .addrow{display:flex;gap:6px;flex-wrap:wrap;padding:6px 4px}
+  .addrow input{min-width:140px;flex:1}
+  .lock{font-size:12px;color:var(--muted)}
+  .callout{border-left:3px solid var(--bad);background:var(--surface);padding:10px 12px;border-radius:0 8px 8px 0;margin:8px 0}
+  .card{background:var(--raised);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+
+  /* Folha */
+  .paper{background:#fff;color:#16181d;font:12.5px/1.45 var(--serif);padding:28px 32px;border-radius:2px;box-shadow:0 1px 2px #0003,0 10px 28px #0002}
+  .paper .name{font:700 21px var(--serif);letter-spacing:-.01em}
+  .paper h4{margin:12px 0 4px;font:700 12px var(--serif);border-bottom:1px solid #888;padding-bottom:2px}
+  .paper ul{margin:2px 0 5px;padding-left:18px}
+  .paper .ct{color:#555;font-size:11.5px}
+  .pagebreak{margin:12px -32px;border-top:2px dashed #b8402a;text-align:center;color:#b8402a;font:600 11px var(--ui);padding-top:3px}
+  .sheetcap{display:flex;justify-content:space-between;margin-bottom:6px}
+
+  /* Variante B */
+  .reqlist button{display:flex;gap:8px;width:100%;text-align:left;border:0;border-radius:8px;padding:8px 10px;align-items:flex-start}
+  .reqlist button[aria-current="true"]{background:var(--raised);box-shadow:0 0 0 1px var(--rule)}
+  .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex-shrink:0;background:var(--good)}
+  .dot.gap{background:var(--bad)}
+
+  /* Telas simples */
+  .page{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+  .page h1{font-size:26px;letter-spacing:-.02em;margin-bottom:6px}
+  .bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--good)}
+  .overlay{position:fixed;inset:0;background:#0009;z-index:60;display:grid;place-items:center;padding:20px}
+  .overlay .inner{max-height:92vh;overflow:auto;width:min(680px,100%)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- Dados inventados ---------- */
+const VAGA = { titulo:"Desenvolvedor(a) Backend Pleno", empresa:"Acme Pagamentos",
+  texto:"Buscamos pessoa desenvolvedora backend pleno para APIs de pagamentos.\n\nRequisitos:\n- Node.js e TypeScript em APIs REST\n- PostgreSQL e boa modelagem de dados\n- Testes automatizados\n- Experiência com AWS (ECS, Lambda)\n- Mensageria (Kafka ou RabbitMQ)\n- Liderança técnica de squads pequenas" };
+const REQS = [
+  { id:"r1", t:"Node.js/TypeScript em APIs REST" },
+  { id:"r2", t:"PostgreSQL e modelagem de dados" },
+  { id:"r3", t:"Testes automatizados" },
+  { id:"r4", t:"AWS (ECS, Lambda)" },
+  { id:"r5", t:"Mensageria (Kafka/RabbitMQ)" },
+  { id:"r6", t:"Liderança técnica" },
+];
+const PAGE_LINES = 28; // artificialmente baixo: os dados de exemplo são curtos, e queremos ver o estouro
+const ITEMS = [
+  { id:"s1", sec:"resumo", t:"Desenvolvedor backend com 6 anos de experiência em APIs Node.js e bancos relacionais.", covers:["r1","r2"], on:true },
+  { id:"s2", sec:"resumo", t:"Desenvolvedor full stack com 6 anos de experiência entregando produtos web de ponta a ponta.", covers:[], on:false },
+  { id:"e1", sec:"exp", t:"Alfa Logística · Dev Backend · 2022–atual", covers:[], on:true, head:true },
+  { id:"b1", sec:"exp", parent:"e1", t:"Reduzi a latência p95 das APIs de roteirização de 800ms para 220ms com cache e índices.", covers:["r1","r2"], on:true },
+  { id:"b2", sec:"exp", parent:"e1", t:"Migrei serviços para ECS com deploy contínuo, cortando o tempo de release de 2h para 15min.", covers:["r4"], on:true },
+  { id:"b3", sec:"exp", parent:"e1", t:"Liderei a squad de 4 devs na reescrita do módulo de cotação de frete.", covers:["r6"], on:true },
+  { id:"b4", sec:"exp", parent:"e1", t:"Cobertura de testes do núcleo de cálculo de 35% para 82% com Jest e testes de contrato.", covers:["r3"], on:true },
+  { id:"b4b", sec:"exp", parent:"e1", t:"Organizei o rodízio de plantão e a documentação de runbooks do time.", covers:[], on:true },
+  { id:"e2", sec:"exp", t:"Beta Commerce · Dev Full Stack · 2019–2022", covers:[], on:true, head:true },
+  { id:"b5", sec:"exp", parent:"e2", t:"Construí o checkout em React e Node.js que processou R$ 4 mi/mês.", covers:["r1"], on:true },
+  { id:"b6", sec:"exp", parent:"e2", t:"Modelei o schema de pedidos em PostgreSQL com particionamento por mês.", covers:["r2"], on:true },
+  { id:"b7", sec:"exp", parent:"e2", t:"Integrei o fluxo de eventos de pedido via RabbitMQ entre estoque e faturamento.", covers:["r5"], on:false },
+  { id:"b7b", sec:"exp", parent:"e2", t:"Criei o painel interno de atendimento em React com filtros e exportação.", covers:[], on:true },
+  { id:"e3", sec:"exp", t:"Gama Tech · Estagiário · 2018", covers:[], on:false, head:true },
+  { id:"b8", sec:"exp", parent:"e3", t:"Corrigi bugs e escrevi scripts de automação em Python.", covers:[], on:false },
+  { id:"p1", sec:"proj", t:"API de reservas (open source): Node, Postgres, 120 testes e documentação OpenAPI.", covers:["r1","r3"], on:true },
+  { id:"p2", sec:"proj", t:"Bot de Telegram para controle de gastos pessoais.", covers:[], on:false },
+  { id:"k1", sec:"skill", t:"TypeScript", covers:["r1"], on:true },
+  { id:"k2", sec:"skill", t:"Node.js", covers:["r1"], on:true },
+  { id:"k3", sec:"skill", t:"PostgreSQL", covers:["r2"], on:true },
+  { id:"k4", sec:"skill", t:"Docker", covers:[], on:true },
+  { id:"k5", sec:"skill", t:"Jest", covers:["r3"], on:true },
+  { id:"k6", sec:"skill", t:"React", covers:[], on:false },
+  { id:"k7", sec:"skill", t:"Python", covers:[], on:false },
+  { id:"k8", sec:"skill", t:"RabbitMQ", covers:["r5"], on:false },
+];
+const SECS = { resumo:"Resumo", exp:"Experiência", proj:"Projetos", skill:"Skills" };
+const SEC_ORDER = ["resumo","exp","proj","skill"];
+const STEPS = [ {k:"mestre",l:"Mestre"}, {k:"vaga",l:"Vaga"}, {k:"revisao",l:"Revisão"}, {k:"exportar",l:"Exportar"} ];
+
+/* ---------- Estado e lógica ---------- */
+let items = JSON.parse(JSON.stringify(ITEMS));
+let gen = 1, adding = null, nid = 0, selReq = "r5", showSheet = false;
+const openSecs = new Set(["resumo","exp"]);
+const byId = id => items.find(i => i.id === id);
+const children = id => items.filter(i => i.parent === id);
+const siblings = it => items.filter(i => i.sec === it.sec && i.parent === it.parent);
+const visible = it => it.on && (!it.parent || byId(it.parent).on);
+
+function toggle(id){
+  const it = byId(id);
+  if (it.sec === "resumo"){ items.filter(i=>i.sec==="resumo").forEach(i=>i.on = i.id===id); return; }
+  it.on = !it.on;
+}
+function move(id, d){
+  const it = byId(id), sib = siblings(it), i = sib.indexOf(it), j = i + d;
+  if (j < 0 || j >= sib.length) return;
+  if (!it.head){ const a = items.indexOf(it), b = items.indexOf(sib[j]); [items[a], items[b]] = [items[b], items[a]]; return; }
+  const blk = x => [x, ...children(x.id)];
+  const A = blk(it), B = blk(sib[j]);
+  const rest = items.filter(x => !A.includes(x) && !B.includes(x));
+  const pos = Math.min(items.indexOf(A[0]), items.indexOf(B[0]));
+  const order = d < 0 ? [...A, ...B] : [...B, ...A];
+  items = [...rest.slice(0,pos), ...order, ...rest.slice(pos)];
+}
+function regen(){
+  gen++;
+  items.forEach(i => {
+    const o = ITEMS.find(x=>x.id===i.id);
+    if (o) { i.on = o.on; return; }
+    i.new = false; i.on = true; // item criado na revisão: a IA agora o "viu". Stub: casa tags com requisitos.
+    const tg = (i.tags||[]).map(t=>t.toLowerCase());
+    i.covers = REQS.filter(r => tg.some(t => r.t.toLowerCase().includes(t))).map(r=>r.id);
+  });
+}
+function addItem(sec, parent, t, tags){
+  const it = { id:"n"+(++nid), sec, t, covers:[], on:true, new:true, tags };
+  if (parent) it.parent = parent;
+  const same = items.filter(i => i.sec===sec && i.parent===parent);
+  const last = same.length ? same[same.length-1] : items.filter(i=>i.sec===sec).pop();
+  items.splice(items.indexOf(last)+1, 0, it);
+}
+const covered = rid => items.filter(i => visible(i) && (i.covers||[]).includes(rid));
+const gaps = () => REQS.filter(r => covered(r.id).length === 0);
+function lines(){
+  let n = 8;
+  for (const s of SEC_ORDER){
+    const vis = items.filter(i => i.sec===s && visible(i));
+    if (!vis.length) continue;
+    n += 2;
+    if (s === "skill") n += Math.ceil(vis.map(v=>v.t.length+3).reduce((a,b)=>a+b,0)/92);
+    else for (const it of vis) n += it.head ? 1.6 : Math.ceil(it.t.length/88);
+  }
+  return n;
+}
+const pages = () => lines()/PAGE_LINES;
+const fmtP = () => pages().toFixed(2).replace(".", ",");
+
+/* ---------- Peças ---------- */
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const reqNum = rid => rid.slice(1);
+function tagsOf(it){
+  return (it.new?`<span class="tag new" title="Salvo no mestre. A IA só considera o item na próxima geração.">novo · a IA ainda não viu</span>`:"")
+    + (it.covers||[]).map(r=>`<span class="tag ok" title="${esc(REQS.find(x=>x.id===r).t)}">cobre ${reqNum(r)}</span>`).join("");
+}
+function ctl(it){
+  const sib = siblings(it), i = sib.indexOf(it);
+  const mv = it.sec==="resumo" ? "" :
+    `<button data-a="up" data-id="${it.id}" ${i===0?"disabled":""} aria-label="Subir">↑</button>
+     <button data-a="down" data-id="${it.id}" ${i===sib.length-1?"disabled":""} aria-label="Descer">↓</button>`;
+  const label = it.sec==="resumo" ? (it.on?"em uso":"usar este") : (it.on?"Ocultar":"Mostrar");
+  return `<span class="ctl">${mv}<button data-a="toggle" data-id="${it.id}" ${it.sec==="resumo"&&it.on?"disabled":""}>${label}</button></span>`;
+}
+function row(it, indent){
+  return `<div class="row ${visible(it)?"":"off"} ${it.head?"head":""}" style="--i:${indent||0}"><span class="txt">${esc(it.t)}${tagsOf(it)}</span>${ctl(it)}</div>`;
+}
+function addUI(sec, parent, label, tags){
+  const p = parent||null;
+  if (adding && adding.sec===sec && adding.parent===p)
+    return `<div class="addrow"><input id="add-t" placeholder="Texto do item" style="flex:2"><input id="add-g" placeholder="Tags (opcional)" value="${esc(adding.tags||"")}"><button class="primary" data-a="save">Salvar no mestre</button><button data-a="cancel">Cancelar</button></div>`;
+  return `<button data-a="add" data-sec="${sec}" ${parent?`data-parent="${parent}"`:""} ${tags?`data-tags="${esc(tags)}"`:""} style="margin:6px 0">+ ${label}</button>`;
+}
+function countText(s){
+  const base = items.filter(i => i.sec===s && !(s==="exp" && i.parent));
+  const on = base.filter(visible).length;
+  return s==="resumo" ? "" : `${on} de ${base.length} visíveis`;
+}
+function section(s, inner){
+  return `<details class="sec" data-sec="${s}" ${openSecs.has(s)?"open":""}><summary>${SECS[s]}<span class="cnt">${countText(s)}</span></summary><div class="body">${inner}</div></details>`;
+}
+function sectionRows(s){
+  let h = "";
+  for (const it of items.filter(i => i.sec===s && !i.parent)){
+    h += row(it, 0);
+    if (it.head){ h += children(it.id).map(k=>row(k,1)).join(""); h += `<div style="padding-left:18px">${addUI("exp", it.id, "bullet nesta experiência")}</div>`; }
+  }
+  if (s==="proj") h += addUI("proj", null, "projeto");
+  if (s==="skill") h += addUI("skill", null, "skill");
+  return h;
+}
+function paper(){
+  const parts = [`<div class="name">Rafael Exemplo</div><div class="ct">e-mail · telefone · cidade · links</div>`];
+  let acc = 8, broke = false;
+  const brk = c => { acc += c; if (!broke && acc > PAGE_LINES){ broke = true; parts.push(`<div class="pagebreak">fim da página 1</div>`); } };
+  for (const s of SEC_ORDER){
+    const vis = items.filter(i => i.sec===s && visible(i));
+    if (!vis.length) continue;
+    brk(2); parts.push(`<h4>${SECS[s]}</h4>`);
+    if (s === "skill"){ parts.push(`<div>${vis.map(v=>esc(v.t)).join(" · ")}</div>`); brk(Math.ceil(vis.map(v=>v.t.length+3).reduce((a,b)=>a+b,0)/92)); continue; }
+    let open = false;
+    for (const it of vis){
+      if (it.head){ if (open) parts.push("</ul>"); parts.push(`<div><b>${esc(it.t)}</b></div><ul>`); open = true; brk(1.6); }
+      else if (it.parent){ brk(Math.ceil(it.t.length/88)); parts.push(`<li>${esc(it.t)}</li>`); }
+      else { if (open){ parts.push("</ul>"); open=false; } brk(Math.ceil(it.t.length/88)); parts.push(`<div style="margin:3px 0">${esc(it.t)}</div>`); }
+    }
+    if (open) parts.push("</ul>");
+  }
+  parts.push(`<h4>Formação</h4><div>Bacharelado em Sistemas de Informação, 2018</div><h4>Idiomas</h4><div>Português (nativo), Inglês (avançado)</div>`);
+  return `<div class="paper">${parts.join("")}</div>`;
+}
+function sheetBlock(){
+  return `<div class="sheetcap"><span class="small muted">Folha do PDF</span><span class="small">${pageText()}</span></div>${paper()}`;
+}
+function pageText(){
+  const p = pages();
+  return p<=1 ? `<span class="good">cabe em 1 página</span>` : p<=2 ? `<span class="warn">passa de 1 página: ${fmtP()}</span>` : `<span class="bad">passa de 2 páginas: ${fmtP()}</span>`;
+}
+function meter(){
+  const p = Math.min(pages()/2,1)*100;
+  return `<div class="meter ${pages()>1?"over":""}" role="img" aria-label="Uso de página: ${fmtP()}"><i style="width:${p}%"></i><b title="limite de 1 página"></b></div>`;
+}
+
+/* ---------- Telas ---------- */
+function ScreenMestre(){
+  const cnt = s => items.filter(i=>i.sec===s && !i.head).length;
+  const secs = [["Dados pessoais e contato","completo",100],["Resumo",cnt("resumo")+" versões",80],["Experiência",items.filter(i=>i.head).length+" experiências · "+items.filter(i=>i.parent).length+" bullets",90],["Projetos",cnt("proj")+" itens",60],["Skills",cnt("skill")+" itens",100],["Formação, certificações e idiomas","2 de 3 seções",70]];
+  return `<main class="page"><h1>Currículo mestre</h1><p class="muted">Tudo o que a IA pode escolher. Ela nunca escreve nada que não esteja aqui.</p>
+    <div style="margin-top:18px">${secs.map(([n,d,p])=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>${n}</b><div class="small muted">${d}</div></div><button data-a="stub" data-m="Aqui abriria o formulário da seção (salvamento automático).">Editar</button></div><div class="bar" aria-hidden="true"><i style="width:${p}%"></i></div></div>`).join("")}</div>
+    <p class="small muted">Itens criados na revisão aparecem aqui automaticamente.</p>
+    <div style="margin-top:14px"><button class="primary" data-a="go" data-s="vaga">Continuar para a vaga</button></div></main>`;
+}
+function ScreenVaga(){
+  return `<main class="page"><h1>Vaga</h1><p class="muted">Cole o texto da vaga. A IA extrai os requisitos e escolhe os itens do mestre.</p>
+    <textarea id="vaga-t" rows="12" style="width:100%;margin-top:16px" aria-label="Texto da vaga">${esc(VAGA.texto)}</textarea>
+    <div style="margin-top:12px;display:flex;gap:8px"><button data-a="go" data-s="mestre">Voltar ao mestre</button><button class="primary" data-a="analyze">Analisar vaga</button></div></main>`;
+}
+function ScreenExportar(){
+  const g = gaps(), hid = items.filter(i=>!visible(i) && !i.head).length;
+  const ok = pages() <= 2;
+  return `<main class="page"><h1>Exportar</h1><p class="muted">Currículo adaptado para ${esc(VAGA.titulo)} · ${esc(VAGA.empresa)}</p>
+    <div class="card" style="margin-top:16px">
+      <div class="row" style="border:0"><span class="txt">Páginas</span><span>${pageText()}</span></div>
+      <div class="row"><span class="txt">Lacunas da vaga</span><span class="${g.length?"warn":"good"}">${g.length?g.length+": "+g.map(r=>esc(r.t)).join("; "):"nenhuma"}</span></div>
+      <div class="row"><span class="txt">Itens ocultos</span><span>${hid}</span></div>
+    </div>
+    ${g.length?`<p class="small muted">Lacunas não bloqueiam a exportação. Elas só avisam que a vaga pede algo que o mestre não cobre.</p>`:""}
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button data-a="go" data-s="revisao">Voltar à revisão</button>
+      <button class="primary" data-a="stub" data-m="Aqui o PDF seria gerado e baixado." ${ok?"":"disabled"}>Baixar PDF</button></div>
+    ${ok?"":`<p class="small bad" style="margin-top:8px">Passou de 2 páginas. Oculte itens na revisão para exportar.</p>`}</main>`;
+}
+
+/* ---------- Revisão ---------- */
+function ctxBar(){
+  const g = gaps(), n = REQS.length;
+  return `<div class="ctx">
+    <div><div class="job">${esc(VAGA.titulo)}</div><div class="small muted">${esc(VAGA.empresa)} · geração ${gen}</div></div>
+    <div><div class="small"><b>${n-g.length} de ${n}</b> requisitos cobertos${g.length?` · <span class="bad">${g.length} lacuna${g.length>1?"s":""}</span>`:""} · ${pageText()}</div>${meter()}</div>
+    <div class="acts"><button data-a="regen">Regenerar</button><button class="primary" data-a="go" data-s="exportar">Continuar para exportar</button></div></div>`;
+}
+const VARIANTS = {
+  A:{ name:"Lista e folha", fn:VariantA }, B:{ name:"Por requisito", fn:VariantB }, C:{ name:"Documento", fn:VariantC } };
+const keys = Object.keys(VARIANTS);
+function tabs(v){
+  return `<div class="tabs"><span class="small muted">Layout da revisão (protótipo)</span>
+    <div class="seg" role="tablist">${keys.map(k=>`<button role="tab" aria-selected="${k===v}" data-a="variant" data-v="${k}">${k} · ${VARIANTS[k].name}</button>`).join("")}</div>
+    <span class="small muted">← → também trocam</span></div>`;
+}
+function gapStrip(){
+  const g = gaps();
+  if (!g.length) return `<div class="card"><span class="good"><b>Todos os requisitos têm cobertura.</b></span></div>`;
+  return `<div class="card"><b>A vaga pede e o mestre não cobre</b>${g.map(r=>`<div class="row" style="border:0;padding-left:0"><span class="txt"><span class="hl">${esc(r.t)}</span></span><button data-a="add" data-sec="exp" data-parent="e1" data-tags="${esc(r.t.split(/[\s/(]/)[0].toLowerCase())}">+ bullet</button></div>`).join("")}${adding && adding.parent==="e1" && adding.sec==="exp" ? addUI("exp","e1","") : ""}</div>`;
+}
+function VariantA(){
+  return `<div class="wrap wrapA"><div>${gapStrip()}${SEC_ORDER.map(s=>section(s, sectionRows(s))).join("")}</div>
+    <div class="sticky">${sheetBlock()}</div></div>`;
+}
+function VariantB(){
+  const r = REQS.find(x=>x.id===selReq) || REQS[0];
+  const cov = covered(r.id);
+  const hidden = items.filter(i => !visible(i) && !i.head && (i.covers||[]).includes(r.id));
+  const list = REQS.map(q=>{ const c = covered(q.id).length; return `<button data-a="req" data-id="${q.id}" aria-current="${q.id===r.id}"><span class="dot ${c?"":"gap"}"></span><span><span class="${c?"":"hl"}">${esc(q.t)}</span><span class="small muted" style="display:block">${c?c+" "+(c>1?"itens":"item"):"sem cobertura"}</span></span></button>`; }).join("");
+  const detail = `<h2 style="font-size:19px;letter-spacing:-.01em;margin-bottom:8px">${esc(r.t)}</h2>
+    ${cov.length?`<div class="card"><b>Cobrem este requisito</b>${cov.map(i=>row(i,0)).join("")}</div>`
+      :`<div class="callout"><b>Nenhum item visível cobre isto.</b><div class="small muted">Reative um candidato oculto abaixo ou escreva um item novo.</div></div>`}
+    ${hidden.length?`<div class="card"><b>Candidatos ocultos</b>${hidden.map(i=>row(i,0)).join("")}</div>`:""}
+    <div class="card"><b>Escrever item novo</b><div class="small muted">Salvo no mestre. A IA o considera ao regenerar.</div>
+      ${items.filter(i=>i.head).slice(0,2).map(e=>`<div>${addUI("exp", e.id, "bullet em "+esc(e.t.split(" · ")[0]), r.t.split(/[\s/(]/)[0].toLowerCase())}</div>`).join("")}
+      <div>${addUI("skill", null, "skill", r.t.split(/[\s/(]/)[0].toLowerCase())}</div></div>
+    <p class="small muted">Para mudar a ordem dos itens, use os layouts A ou C.</p>`;
+  return `<div class="wrap wrapB"><div class="reqlist sticky">${list}</div><div>${detail}</div><div class="sticky">${sheetBlock()}</div></div>`;
+}
+function VariantC(){
+  const g = gaps();
+  const doc = SEC_ORDER.map(s=>section(s, sectionRows(s))).join("");
+  const rail = `<div class="sticky"><div class="card"><b>Requisitos</b>${REQS.map(r=>`<div class="small" style="margin:5px 0">${covered(r.id).length?`<span class="good">✓</span> ${esc(r.t)}`:`<span class="bad">✗</span> <span class="hl">${esc(r.t)}</span>`}</div>`).join("")}</div>
+    <div class="card"><b>Página</b>${meter()}<div class="small">${pageText()}</div></div>
+    <button data-a="sheet" style="width:100%">Ver folha do PDF</button></div>`;
+  return `<div class="wrap wrapC"><div>${g.length?gapStrip():""}${doc}</div>${rail}</div>${showSheet?`<div class="overlay" data-a="sheet"><div class="inner" onclick="event.stopPropagation()">${sheetBlock()}<div style="text-align:center;margin-top:10px"><button class="primary" data-a="sheet">Fechar</button></div></div></div>`:""}`;
+}
+
+/* ---------- Roteamento e eventos ---------- */
+const screen = () => { const s = location.hash.replace(/^#\/?/,""); return STEPS.some(x=>x.k===s) ? s : "revisao"; };
+const curV = () => { const v = new URLSearchParams(location.search).get("variant"); return keys.includes(v) ? v : "A"; };
+function setVariant(v){ const u = new URL(location); u.searchParams.set("variant", v); history.replaceState(null,"",u); render(); }
+function shell(cur){
+  const ci = STEPS.findIndex(s=>s.k===cur);
+  return `<header class="shell"><span class="brand">Resume Forge</span><nav class="steps" aria-label="Etapas">${STEPS.map((s,i)=>
+    `<button class="step ${i<ci?"done":""}" data-a="go" data-s="${s.k}" ${i===ci?'aria-current="step"':""}><span class="n">${i<ci?"✓":i+1}</span>${s.l}</button>`).join("")}</nav><span class="proto">Protótipo</span></header>`;
+}
+function render(){
+  const cur = screen(), v = curV();
+  let body = "";
+  if (cur==="mestre") body = ScreenMestre();
+  else if (cur==="vaga") body = ScreenVaga();
+  else if (cur==="exportar") body = ScreenExportar();
+  else body = ctxBar() + tabs(v) + VARIANTS[v].fn();
+  const y = scrollY;
+  document.getElementById("app").innerHTML = shell(cur) + body;
+  scrollTo(0, y);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-a]"); if (!b) return;
+  const a = b.dataset.a, id = b.dataset.id;
+  if (a==="go"){ location.hash = "#/"+b.dataset.s; scrollTo(0,0); return; }
+  if (a==="analyze"){ gen++; location.hash = "#/revisao"; return; }
+  if (a==="variant") return setVariant(b.dataset.v);
+  if (a==="stub"){ alert("STUB: "+b.dataset.m); return; }
+  if (a==="toggle") toggle(id);
+  else if (a==="up") move(id,-1);
+  else if (a==="down") move(id,1);
+  else if (a==="regen") regen();
+  else if (a==="req") selReq = id;
+  else if (a==="sheet") showSheet = !showSheet;
+  else if (a==="add") adding = { sec:b.dataset.sec, parent:b.dataset.parent||null, tags:b.dataset.tags||"" };
+  else if (a==="cancel") adding = null;
+  else if (a==="save"){
+    const t = document.getElementById("add-t").value.trim(); if (!t) return;
+    const tags = document.getElementById("add-g").value.split(",").map(x=>x.trim()).filter(Boolean);
+    addItem(adding.sec, adding.parent||undefined, t, tags); adding = null;
+  }
+  render();
+});
+document.addEventListener("toggle", e => {
+  const d = e.target; if (!d.dataset || !d.dataset.sec) return;
+  d.open ? openSecs.add(d.dataset.sec) : openSecs.delete(d.dataset.sec);
+}, true);
+document.addEventListener("keydown", e => {
+  if (screen()!=="revisao" || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const i = keys.indexOf(curV());
+  if (e.key==="ArrowLeft") setVariant(keys[(i+keys.length-1)%keys.length]);
+  if (e.key==="ArrowRight") setVariant(keys[(i+1)%keys.length]);
+  if (e.key==="Escape" && showSheet){ showSheet = false; render(); }
+});
+addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>

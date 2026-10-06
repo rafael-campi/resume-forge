@@ -1,0 +1,7 @@
+# Rede de segurança na raiz; cada projeto tem o seu .gitignore.
+.env
+.env.local
+.env*.local
+node_modules/
+.venv/
+__pycache__/
