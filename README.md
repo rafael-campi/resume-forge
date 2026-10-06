@@ -11,9 +11,12 @@ Cada projeto tem o seu `README.md`, `CONTEXT.md` (vocabulário) e `docs/`. Decis
 
 Atenção: "Vaga" tem sentido diferente em cada `CONTEXT.md` (publicação do LinkedIn com job id, no `apply-jobs`; texto colado, no `resume-forge`).
 
-## Painel de candidaturas
+## App do resume-forge
 
-`resume-forge/` tem um painel somente de leitura com o funil de Candidaturas do bot (por Status), busca e o histórico de cada Vaga. Ele lê o mesmo Postgres do bot (ver `docs/adr/0001-monorepo-e-postgres-compartilhado.md`).
+`resume-forge/` é um app Next.js que usa o mesmo Postgres do bot (ver `docs/adr/0001-monorepo-e-postgres-compartilhado.md`):
+
+- **Currículo mestre** (`/mestre`): formulário por seção com salvamento automático e indicador de completude. As migrações do `resume-forge` (tabelas `forge_*`) rodam sozinhas na primeira requisição.
+- **Candidaturas** (`/candidaturas`): painel somente de leitura com o funil por Status, busca e o histórico de cada Vaga.
 
 ```bash
 (cd apply-jobs && docker compose up -d db)     # Postgres na porta 5433

@@ -96,3 +96,54 @@ h2 { font-size: 1.125rem; margin: 2rem 0 0.75rem; }
   .lista tr:last-child { border-bottom: 0; }
   .lista td { padding: 0.125rem 0; border: 0; }
 }
+
+/* Navegação principal */
+.topo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; max-width: 64rem; margin: 0 auto; padding: 0.75rem 1rem; border-bottom: 1px solid var(--linha); }
+.topo .marca { font-weight: 650; }
+.topo ul { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; }
+.topo a { text-decoration: none; color: var(--suave); padding: 0.25rem 0; border-bottom: 2px solid transparent; }
+.topo a:hover { color: var(--tinta); }
+.topo a[aria-current="page"] { color: var(--tinta); border-bottom-color: var(--tinta); }
+
+/* Currículo mestre */
+.mestre { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 2rem; align-items: start; }
+.secoes ul { list-style: none; margin: 0; padding: 0; position: sticky; top: 1rem; }
+.secoes a { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.625rem; text-decoration: none; border-radius: 6px; }
+.secoes a:hover { background: var(--superficie); }
+.estado { font-size: 0.8125rem; color: var(--suave); }
+.estado[data-estado="falta"] { color: var(--s-revisao_manual); font-weight: 600; }
+.estado[data-estado="ok"] { color: var(--s-enviada); }
+.conteudo > h1 { margin-bottom: 0.25rem; }
+.pendencias { margin: 0.5rem 0 1rem; padding-left: 1.25rem; color: var(--s-revisao_manual); }
+.pendencias ul { margin: 0.125rem 0 0.5rem; color: var(--suave); }
+.salvamento { margin: 0.25rem 0 0.75rem; font-size: 0.875rem; color: var(--suave); min-height: 1.5rem; }
+.salvamento[data-estado="erro"] { color: var(--s-falhou); }
+
+.campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.75rem 1rem; margin: 1rem 0; }
+.campo { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.campo-largo { grid-column: 1 / -1; }
+.campo label { font-size: 0.875rem; font-weight: 600; }
+.campo input[type="text"], .campo input[type="email"], .campo input[type="tel"], .campo input[type="url"], .campo input[type="month"], .campo input[type="number"], .campo textarea {
+  font: inherit; color: inherit; background: var(--superficie); border: 1px solid var(--linha); border-radius: 6px; padding: 0.5rem 0.625rem; width: 100%;
+}
+.campo textarea { resize: vertical; }
+.campo-marca label, .marca-inline { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
+.marca-inline { font-size: 0.875rem; }
+.ajuda { margin: 0; font-size: 0.8125rem; color: var(--suave); }
+
+.cartao { background: var(--superficie); border: 1px solid var(--linha); border-radius: 6px; padding: 0.75rem 1rem; margin: 1rem 0; }
+.cartao .cartao { background: var(--fundo); margin: 0.75rem 0; }
+.cartao-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.cartao-topo h2, .cartao-topo h3 { margin: 0; font-size: 1.0625rem; }
+.cartao-topo h3 { font-size: 0.9375rem; }
+.bullets h3 { margin: 0.5rem 0 0; font-size: 1rem; }
+.remover, .adicionar { font: inherit; font-size: 0.875rem; color: inherit; background: transparent; border: 1px solid var(--linha); border-radius: 6px; padding: 0.375rem 0.75rem; cursor: pointer; }
+.remover:hover { border-color: var(--s-falhou); color: var(--s-falhou); }
+.adicionar { background: var(--superficie); }
+.adicionar:hover { border-color: var(--tinta); }
+
+@media (max-width: 48rem) {
+  .mestre { grid-template-columns: 1fr; gap: 1rem; }
+  .secoes ul { position: static; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .secoes a { flex-direction: column; gap: 0; border: 1px solid var(--linha); background: var(--superficie); }
+}
