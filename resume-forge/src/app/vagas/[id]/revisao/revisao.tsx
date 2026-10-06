@@ -166,7 +166,11 @@ export function Revisao(p: Props) {
               </>
             )}
             <button type="button" className="adicionar" onClick={regenerar}>Regenerar</button>
-            <button type="button" className="principal" disabled title="A exportação do PDF é o próximo passo do app.">Continuar para exportar</button>
+            {medida.paginas > 2 ? (
+              <button type="button" className="principal" disabled title="Passa de 2 páginas: oculte itens para poder exportar.">Continuar para exportar</button>
+            ) : (
+              <Link className="principal" href={`/vagas/${p.vaga.id}/exportar${p.ehAtual ? "" : `?geracao=${p.geracao.id}`}`}>Continuar para exportar</Link>
+            )}
           </div>
         </div>
       </header>

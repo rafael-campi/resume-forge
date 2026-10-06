@@ -1,7 +1,12 @@
 "use client";
 
+import "@fontsource/source-sans-3/latin-400.css";
+import "@fontsource/source-sans-3/latin-400-italic.css";
+import "@fontsource/source-sans-3/latin-600.css";
+import "@fontsource/source-sans-3/latin-700.css";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Folha } from "./folha";
+import "./folha.css";
+import { folhaHtml } from "./folha";
 import type { CurriculoFinal } from "./montar";
 
 const MARGEM_MM = 18;
@@ -24,7 +29,8 @@ export type Medida = { fracao: number; paginas: number };
  * É uma estimativa feita com o mesmo HTML do PDF; o número final vem do PDF gerado.
  */
 export function FolhaMedida({ curriculo, onMedida }: { curriculo: CurriculoFinal; onMedida: (m: Medida) => void }) {
-  const conteudo = useRef<HTMLDivElement>(null);
+  const raiz = useRef<HTMLDivElement>(null);
+  const conteudo = () => raiz.current?.querySelector<HTMLElement>(".folha-conteudo") ?? null;
   const caixa = useRef<HTMLDivElement>(null);
   const [fracao, setFracao] = useState(1);
   const [escala, setEscala] = useState(0.6);
@@ -33,8 +39,9 @@ export function FolhaMedida({ curriculo, onMedida }: { curriculo: CurriculoFinal
   aviso.current = onMedida;
 
   useLayoutEffect(() => {
-    if (!conteudo.current) return;
-    const f = conteudo.current.offsetHeight / mmParaPx(ALTURA_UTIL_MM);
+    const c = conteudo();
+    if (!c) return;
+    const f = c.offsetHeight / mmParaPx(ALTURA_UTIL_MM);
     setFracao(f);
     aviso.current({ fracao: f, paginas: Math.max(1, Math.ceil(f - 0.001)) });
   }, [curriculo]);
@@ -50,7 +57,7 @@ export function FolhaMedida({ curriculo, onMedida }: { curriculo: CurriculoFinal
   }, []);
 
   useLayoutEffect(() => {
-    setAltura(Math.max(mmParaPx(297), conteudo.current ? conteudo.current.offsetHeight + mmParaPx(2 * MARGEM_MM) : 0) * escala);
+    setAltura(Math.max(mmParaPx(297), (conteudo()?.offsetHeight ?? 0) + mmParaPx(2 * MARGEM_MM)) * escala);
   }, [curriculo, escala]);
 
   const quebras = Array.from({ length: Math.max(1, Math.ceil(fracao - 0.001)) }, (_, i) => i + 1).filter((i) => i === 1 || i < fracao);
@@ -58,7 +65,7 @@ export function FolhaMedida({ curriculo, onMedida }: { curriculo: CurriculoFinal
   return (
     <div ref={caixa} className="folha-caixa" style={{ height: altura || undefined }} aria-label="Pré-visualização do currículo">
       <div className="folha-escala" style={{ transform: `scale(${escala})` }}>
-        <Folha c={curriculo} conteudoRef={conteudo} />
+        <div ref={raiz} dangerouslySetInnerHTML={{ __html: folhaHtml(curriculo) }} />
         {quebras.map((i) => (
           <div key={i} className="quebra" style={{ top: `${MARGEM_MM + ALTURA_UTIL_MM * i}mm` }} aria-hidden="true">
             <span>Fim da página {i}</span>

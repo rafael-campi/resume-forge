@@ -18,6 +18,7 @@ Atenção: "Vaga" tem sentido diferente em cada `CONTEXT.md` (publicação do Li
 - **Currículo mestre** (`/mestre`): formulário por seção com salvamento automático e indicador de completude. As migrações do `resume-forge` (tabelas `forge_*`) rodam sozinhas na primeira requisição.
 - **Vagas** (`/vagas`): cole o texto de uma vaga e a IA extrai os requisitos e escolhe, entre os itens do mestre, o que mostrar (sem escrever nada novo). A análise leva de 1 a 2 minutos e roda em segundo plano; a tela acompanha. Da página de uma candidatura do bot, "Criar currículo adaptado" já preenche título, empresa e descrição.
 - **Revisão** (`/vagas/N/revisao`): lista de itens à esquerda e a folha do currículo à direita. Suba, desça, oculte e mostre itens, troque a versão do resumo e veja as lacunas e uma estimativa de páginas (o alvo é 1, o máximo é 2). Os ajustes ficam numa camada à parte: a seleção da IA nunca é alterada, e dá para voltar a uma seleção anterior.
+- **Exportar** (`/vagas/N/exportar`): gera o PDF (A4, uma coluna, fonte embutida) imprimindo a folha no Chromium e conta as páginas **do PDF de verdade**; mais de 2 páginas bloqueiam. Guarda o PDF e um instantâneo do texto exportado. O bot lê o PDF mais recente da vaga pelo job id do LinkedIn.
 - **Candidaturas** (`/candidaturas`): painel somente de leitura com o funil por Status, busca e o histórico de cada Vaga.
 
 ```bash
@@ -35,3 +36,7 @@ cd resume-forge && npm install && npm run dev  # http://127.0.0.1:3000
 | `NVIDIA_MODEL` | Modelo (padrão `google/gemma-4-31b-it`). A lista da NVIDIA muda com o tempo. |
 | `NVIDIA_TIMEOUT_MS` | Tempo limite por chamada (padrão 240000). |
 | `FORGE_IA=falsa` | IA falsa e offline, que só casa palavras. Serve para testar o app sem enviar nada a ninguém. `FORGE_IA_ATRASO_MS` simula a lentidão. |
+
+### PDF: Chromium
+
+A exportação usa o Chromium do Playwright. Instale uma vez com `cd resume-forge && npx playwright install chromium`. Para usar um Chromium que já exista na máquina, defina `CHROMIUM_PATH` com o caminho do executável. Sem Chromium, os testes que imprimem PDF são pulados e a exportação mostra um erro que diz o que fazer.

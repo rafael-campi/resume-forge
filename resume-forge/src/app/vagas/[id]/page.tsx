@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { repositorioCandidaturas } from "../../../candidaturas/pool";
 import { repositorioMestre } from "../../../mestre/pool";
 import { repositorioVagas } from "../../../vagas/pool";
+import { repositorioExportacoes } from "../../../exportar/pool";
 import { carregarEstado } from "../../../revisao/carregar";
 import { coberturaAtual } from "../../../revisao/estado";
 import { analisarDeNovo } from "../acoes";
+import { formatarDataHora } from "../../formatar";
 import { Estado } from "../estado";
 import { Acompanhar } from "./acompanhar";
 import { Excluir } from "./excluir";
@@ -53,6 +55,7 @@ export default async function DetalheVaga({ params }: { params: Promise<{ id: st
       {vaga.estado === "pronta" && vaga.geracao && vaga.requisitos && (
         <Resultado vaga={vaga} />
       )}
+      {vaga.geracao && <UltimoPdf vagaId={id} />}
 
       <details className="texto-vaga">
         <summary>Texto da vaga</summary>
@@ -93,6 +96,23 @@ async function Resultado({ vaga }: { vaga: NonNullable<Awaited<ReturnType<Awaite
           </li>
         ))}
       </ul>
+    </>
+  );
+}
+
+async function UltimoPdf({ vagaId }: { vagaId: number }) {
+  const [ultimo] = await (await repositorioExportacoes()).listar(vagaId);
+  return (
+    <>
+      <h2>PDF</h2>
+      {ultimo ? (
+        <p>
+          Último PDF: {ultimo.paginas} {ultimo.paginas === 1 ? "página" : "páginas"}, exportado em {formatarDataHora(ultimo.exportadaEm)}.{" "}
+          <a href={`/vagas/${vagaId}/exportar/pdf?exportacao=${ultimo.id}`}>Baixar</a>. <Link href={`/vagas/${vagaId}/exportar`}>Exportar de novo</Link>
+        </p>
+      ) : (
+        <p className="suave">Ainda não exportado. Depois de revisar, <Link href={`/vagas/${vagaId}/exportar`}>exporte o PDF</Link>.</p>
+      )}
     </>
   );
 }
