@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Credenciais e dados sensíveis
+.env
+storage/linkedin_cookies.pkl
+storage/debug_*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# ChromeDriver cache
+.wdm/
+
+# Gravação de snapshots e currículo local
+storage/gravacao/
+storage/curriculo.pdf
