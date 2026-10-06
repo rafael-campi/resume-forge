@@ -17,6 +17,7 @@ Atenção: "Vaga" tem sentido diferente em cada `CONTEXT.md` (publicação do Li
 
 - **Currículo mestre** (`/mestre`): formulário por seção com salvamento automático e indicador de completude. As migrações do `resume-forge` (tabelas `forge_*`) rodam sozinhas na primeira requisição.
 - **Vagas** (`/vagas`): cole o texto de uma vaga e a IA extrai os requisitos e escolhe, entre os itens do mestre, o que mostrar (sem escrever nada novo). A análise leva de 1 a 2 minutos e roda em segundo plano; a tela acompanha. Da página de uma candidatura do bot, "Criar currículo adaptado" já preenche título, empresa e descrição.
+- **Revisão** (`/vagas/N/revisao`): lista de itens à esquerda e a folha do currículo à direita. Suba, desça, oculte e mostre itens, troque a versão do resumo e veja as lacunas e uma estimativa de páginas (o alvo é 1, o máximo é 2). Os ajustes ficam numa camada à parte: a seleção da IA nunca é alterada, e dá para voltar a uma seleção anterior.
 - **Candidaturas** (`/candidaturas`): painel somente de leitura com o funil por Status, busca e o histórico de cada Vaga.
 
 ```bash
