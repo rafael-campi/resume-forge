@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { repositorioCandidaturas } from "../../../candidaturas/pool";
+import { repositorioVagas } from "../../../vagas/pool";
 import { formatarDataHora, ROTULO } from "../../formatar";
 import { corDe } from "../../status";
 
@@ -10,6 +11,7 @@ export default async function DetalheCandidatura({ params }: { params: Promise<{
   const { jobId } = await params;
   const vaga = await repositorioCandidaturas().detalhe(decodeURIComponent(jobId));
   if (!vaga) notFound();
+  const adaptada = await (await repositorioVagas()).porJobId(vaga.jobId).catch(() => null);
 
   return (
     <>
@@ -23,6 +25,14 @@ export default async function DetalheCandidatura({ params }: { params: Promise<{
         <a href={`https://www.linkedin.com/jobs/view/${encodeURIComponent(vaga.jobId)}/`} target="_blank" rel="noopener noreferrer">
           Abrir no LinkedIn
         </a>
+      </p>
+
+      <p>
+        {adaptada ? (
+          <Link href={`/vagas/${adaptada}`}>Ver o currículo adaptado a esta vaga</Link>
+        ) : (
+          <Link href={`/vagas/nova?jobId=${encodeURIComponent(vaga.jobId)}`}>Criar currículo adaptado a esta vaga</Link>
+        )}
       </p>
 
       <h2>Histórico de Status</h2>

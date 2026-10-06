@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/mestre", rotulo: "Currículo mestre" },
+  { href: "/vagas", rotulo: "Vagas" },
   { href: "/candidaturas", rotulo: "Candidaturas" },
 ];
 

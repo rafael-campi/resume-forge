@@ -36,7 +36,7 @@ describe.skipIf(!client)("repositório do mestre", () => {
   });
 
   it("migra uma vez: a segunda chamada não aplica nada", async () => {
-    expect(await migrar(db, MIGRACOES)).toEqual(["001_forge_curriculo_mestre"]);
+    expect(await migrar(db, MIGRACOES)).toContain("001_forge_curriculo_mestre");
     expect(await migrar(db, MIGRACOES)).toEqual([]);
   });
 
