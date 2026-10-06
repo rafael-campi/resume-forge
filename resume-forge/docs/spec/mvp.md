@@ -111,9 +111,9 @@ Não verificado: valor dos créditos, limite de taxa oficial e preço por token.
 Ticket: *Stack e arquitetura: TypeScript, framework e persistência*.
 
 - **Next.js** (App Router), TypeScript, um projeto e um processo. As rotas de servidor guardam a chave da IA e orquestram os módulos.
-- **Dados:** Drizzle ORM com **SQLite** local agora (Postgres depois, trocando driver e dialeto), com uma interface de repositório por cima.
+- **Dados:** Drizzle ORM com **Postgres**, o mesmo banco do `apply-jobs` (ver `../docs/adr/0001-monorepo-e-postgres-compartilhado.md` na raiz do monorepo), com uma interface de repositório por cima. Este projeto é dono das suas tabelas (mestre, histórico, currículos adaptados) e só lê as do bot (`vagas`, `candidaturas`, `candidatura_historico`).
 - **Chave da IA:** variável de ambiente só no servidor, em `.env.local` fora do git.
-- **Execução:** um comando e um arquivo SQLite local. Docker só na hospedagem futura.
+- **Execução:** um comando para o app, com o Postgres local no ar (`docker compose up -d db`, definido em `apply-jobs/docker-compose.yml`). Hospedagem continua fora de escopo.
 - **Módulos independentes, sem dependência entre si:**
   - **seleção:** `extrairRequisitos(vaga)` e `selecionar(requisitos, itens)`, com o cliente da IA atrás de interface. Validação e correção da saída em funções puras;
   - **PDF:** `renderizar(curriculoAdaptado) → bytes`;
