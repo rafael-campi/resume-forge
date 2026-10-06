@@ -23,10 +23,10 @@ class InvalidTransition(Exception):
 
 _TRANSITIONS = {
     None: {Status.VISTA},
-    Status.VISTA: {Status.FILTRADA, Status.FORMULARIO_ABERTO, Status.FALHOU},
+    Status.VISTA: {Status.FILTRADA, Status.FORMULARIO_ABERTO, Status.FALHOU, Status.REVISAO_MANUAL},
     Status.FORMULARIO_ABERTO: {Status.ENVIADA, Status.FALHOU, Status.REVISAO_MANUAL},
     Status.REVISAO_MANUAL: {Status.FORMULARIO_ABERTO, Status.FALHOU},
-    Status.FALHOU: {Status.FORMULARIO_ABERTO},
+    Status.FALHOU: {Status.FORMULARIO_ABERTO, Status.REVISAO_MANUAL},
     Status.FILTRADA: {Status.VISTA},
     Status.ENVIADA: set(),
 }

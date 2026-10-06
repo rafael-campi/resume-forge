@@ -39,3 +39,8 @@ def test_falha_pode_ser_tentada_de_novo():
 def test_revisao_manual_pode_voltar_ao_formulario():
     assert can_transition(Status.FORMULARIO_ABERTO, Status.REVISAO_MANUAL)
     assert can_transition(Status.REVISAO_MANUAL, Status.FORMULARIO_ABERTO)
+
+
+def test_curriculo_pendente_antes_de_abrir_o_formulario():
+    assert can_transition(Status.VISTA, Status.REVISAO_MANUAL)
+    assert can_transition(Status.FALHOU, Status.REVISAO_MANUAL)

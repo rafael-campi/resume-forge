@@ -25,8 +25,12 @@ Status de uma Candidatura confirmada visivelmente pelo LinkedIn; clicar em Easy 
 _Avoid_: Aplicada, applied
 
 **Revisão manual**:
-Status de uma Candidatura que o bot não conseguiu concluir sozinho (por exemplo, pergunta sem Resposta conhecida) e que fica para o dono decidir.
+Status de uma Candidatura que o bot não conseguiu concluir sozinho e que fica para o dono decidir: uma pergunta sem Resposta conhecida, ou um Currículo adaptado que o dono ainda não revisou.
 _Avoid_: Pendente, erro
+
+**Currículo**:
+O PDF anexado a uma Candidatura, obtido pela porta Curriculos antes de abrir o formulário. Pode ser sempre o mesmo ou adaptado à Vaga; sem Currículo pronto, o formulário nem é aberto.
+_Avoid_: CV, resume
 
 ## Respostas
 

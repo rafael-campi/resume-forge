@@ -28,7 +28,6 @@ class LinkedInAdapter:
     def __init__(self, driver, config):
         self.driver = driver
         self.timeout = config["browser"]["timeout"]
-        self.resume_path = config["apply"]["resume_path"]
 
     def _esperar(self, seletor):
         return WebDriverWait(self.driver, self.timeout).until(
@@ -53,15 +52,15 @@ class LinkedInAdapter:
             lambda d: parsing.formulario_aberto(d.page_source)
         )
 
-    def preencher_formulario(self):
-        """Avança pelos passos até o de revisão, anexando o currículo; nunca envia."""
+    def preencher_formulario(self, curriculo):
+        """Avança pelos passos até o de revisão, anexando `curriculo` (Path ou None) se pedido; nunca envia."""
         for _ in range(MAX_PASSOS):
             pagina = self.driver.page_source
             passo = parsing.passo_do_formulario(pagina)
             if passo == "enviar":
                 return
             if parsing.precisa_de_curriculo(pagina):
-                self._anexar_curriculo()
+                self._anexar_curriculo(curriculo)
                 pagina = self.driver.page_source
             vazios = parsing.campos_vazios(pagina)
             if vazios:
@@ -74,10 +73,10 @@ class LinkedInAdapter:
                 raise RuntimeError("Passo desconhecido no formulário Easy Apply")
         raise RuntimeError("Formulário com passos demais; abortado")
 
-    def _anexar_curriculo(self):
-        if not self.resume_path:
-            raise FormularioIncompleto("o passo pede currículo e apply.resume_path está vazio")
-        caminho = Path(self.resume_path).expanduser().resolve()
+    def _anexar_curriculo(self, curriculo):
+        if not curriculo:
+            raise FormularioIncompleto("o passo pede currículo e não há currículo configurado (apply.resume_path)")
+        caminho = Path(curriculo).expanduser().resolve()
         if not caminho.is_file():
             raise FormularioIncompleto(f"currículo não encontrado: {caminho}")
         self.driver.find_element(By.CSS_SELECTOR, sel.RESUME_INPUT).send_keys(str(caminho))

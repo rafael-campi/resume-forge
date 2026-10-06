@@ -1,7 +1,7 @@
 import main
 from bot.domain.status import Status
 from bot.domain.vaga import Vaga
-from tests.test_processar_vaga import FakeLinkedIn
+from tests.test_processar_vaga import FakeCurriculos, FakeLinkedIn
 
 CONFIG = {"apply": {"mode": "auto", "max_applications": 2, "delay_between_applications": 0}}
 
@@ -19,7 +19,7 @@ def preparar(repo, *job_ids):
 def test_para_ao_atingir_o_limite_de_enviadas(repo):
     vagas = preparar(repo, "1", "2", "3")
 
-    main.apply_to_jobs(vagas, repo, FakeLinkedIn(), CONFIG)
+    main.apply_to_jobs(vagas, repo, FakeLinkedIn(), FakeCurriculos(), CONFIG)
 
     assert [repo.current_status(v.job_id) for v in vagas] == [
         Status.ENVIADA, Status.ENVIADA, Status.VISTA,
@@ -35,7 +35,7 @@ def test_erro_em_uma_vaga_nao_interrompe_as_demais(repo):
                 raise RuntimeError("quebrou")
             super().abrir_formulario(vaga)
 
-    main.apply_to_jobs(vagas, repo, FalhaNaPrimeira(), CONFIG)
+    main.apply_to_jobs(vagas, repo, FalhaNaPrimeira(), FakeCurriculos(), CONFIG)
 
     assert repo.current_status("1") == Status.FALHOU
     assert repo.current_status("2") == Status.ENVIADA

@@ -9,6 +9,7 @@ import time
 from dotenv import load_dotenv
 
 from bot.config import ler_config
+from bot.curriculos.fixo import PdfFixoCurriculos
 from bot.domain.filters import apply_filters
 from bot.domain.processar import processar_vaga
 from bot.domain.status import Status
@@ -52,7 +53,7 @@ def aprovar_no_terminal(vaga):
     return resposta.strip().lower() in ("s", "sim")
 
 
-def apply_to_jobs(vagas, repo, linkedin, config):
+def apply_to_jobs(vagas, repo, linkedin, curriculos, config):
     """
     Processa as Vagas até o limite de Candidaturas Enviadas da execução.
     O erro em uma Vaga não interrompe as demais.
@@ -67,7 +68,7 @@ def apply_to_jobs(vagas, repo, linkedin, config):
             break
         print(f"\nProcessando: [{vaga.job_id}] {vaga.title} - {vaga.company}")
         try:
-            status = processar_vaga(vaga, repo, linkedin, modo, aprovar_no_terminal)
+            status = processar_vaga(vaga, repo, linkedin, curriculos, modo, aprovar_no_terminal)
         except Exception as erro:
             print(f"❌ Erro inesperado em {vaga.job_id}: {erro}")
             continue
@@ -111,7 +112,8 @@ def main():
 
         print("\n[ETAPA 3] Aplicando para vagas...")
         print("=" * 50)
-        apply_to_jobs(vagas, repo, LinkedInAdapter(driver, config), config)
+        curriculos = PdfFixoCurriculos(config['apply']['resume_path'])
+        apply_to_jobs(vagas, repo, LinkedInAdapter(driver, config), curriculos, config)
 
     except KeyboardInterrupt:
         print("\n\n⚠️  Execução interrompida pelo usuário")
