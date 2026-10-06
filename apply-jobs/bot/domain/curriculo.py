@@ -19,6 +19,7 @@ class MotivoIndisponivel(str, Enum):
     REVISAO_PENDENTE = "revisao_pendente"  # o dono ainda precisa revisar: Revisão manual
     IA_INDISPONIVEL = "ia_indisponivel"    # falha do serviço de IA: Falhou
     SAIDA_INVALIDA = "saida_invalida"      # a IA respondeu algo inutilizável: Falhou
+    FORGE_INDISPONIVEL = "forge_indisponivel"  # o resume-forge não está acessível neste banco: Falhou
 
 
 class CurriculoIndisponivel(Exception):

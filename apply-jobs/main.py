@@ -9,7 +9,7 @@ import time
 from dotenv import load_dotenv
 
 from bot.config import ler_config
-from bot.curriculos.fixo import PdfFixoCurriculos
+from bot.curriculos import criar_curriculos
 from bot.domain.filters import apply_filters
 from bot.domain.processar import processar_vaga
 from bot.domain.status import Status
@@ -112,7 +112,7 @@ def main():
 
         print("\n[ETAPA 3] Aplicando para vagas...")
         print("=" * 50)
-        curriculos = PdfFixoCurriculos(config['apply']['resume_path'])
+        curriculos = criar_curriculos(config, conn)
         apply_to_jobs(vagas, repo, LinkedInAdapter(driver, config), curriculos, config)
 
     except KeyboardInterrupt:

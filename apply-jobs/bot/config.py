@@ -19,9 +19,13 @@ PADROES = {
         "delay_between_applications": 3,
         "easy_apply_only": True,
         "resume_path": "",
+        "curriculo": "fixo",
     },
     "browser": {"headless": False, "timeout": 10, "language": "pt-BR"},
 }
+
+
+FONTES_DE_CURRICULO = ("fixo", "forge")
 
 
 class ConfigInvalida(Exception):
@@ -51,6 +55,8 @@ def _validar(config):
             "browser.headless não combina com apply.mode: confirmar "
             "(não haveria janela para revisar o formulário)"
         )
+    if apply["curriculo"] not in FONTES_DE_CURRICULO:
+        raise ConfigInvalida(f"apply.curriculo inválido: {apply['curriculo']!r} (use fixo ou forge)")
     if apply["max_applications"] < 1:
         raise ConfigInvalida("apply.max_applications precisa ser maior que 0")
     if browser["timeout"] < 1:

@@ -28,7 +28,13 @@ apply:
   # no terminal; "auto" envia sozinho. Padrão: confirmar.
   mode: "confirmar"
 
-  # Caminho do currículo (PDF) anexado quando o formulário pede
+  # De onde vem o currículo anexado:
+  #   "fixo"  -> sempre o PDF de resume_path (comportamento original)
+  #   "forge" -> o PDF que o resume-forge exportou para a Vaga (achado pelo job id). Sem PDF exportado,
+  #              a Candidatura vai para Revisão manual até você revisar e exportar no resume-forge.
+  curriculo: "fixo"
+
+  # Caminho do currículo (PDF) usado quando curriculo: "fixo"
   resume_path: "storage/curriculo.pdf"
 
   # Número máximo de candidaturas enviadas por execução

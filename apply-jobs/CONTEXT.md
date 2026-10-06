@@ -29,7 +29,7 @@ Status de uma Candidatura que o bot não conseguiu concluir sozinho e que fica p
 _Avoid_: Pendente, erro
 
 **Currículo**:
-O PDF anexado a uma Candidatura, obtido pela porta Curriculos antes de abrir o formulário. Pode ser sempre o mesmo ou adaptado à Vaga; sem Currículo pronto, o formulário nem é aberto.
+O PDF anexado a uma Candidatura, obtido pela porta Curriculos antes de abrir o formulário. Pode ser sempre o mesmo, ou o PDF que o resume-forge exportou para a Vaga (achado pelo job id); sem Currículo pronto, o formulário nem é aberto.
 _Avoid_: CV, resume
 
 ## Respostas

@@ -40,3 +40,14 @@ cd resume-forge && npm install && npm run dev  # http://127.0.0.1:3000
 ### PDF: Chromium
 
 A exportação usa o Chromium do Playwright. Instale uma vez com `cd resume-forge && npx playwright install chromium`. Para usar um Chromium que já exista na máquina, defina `CHROMIUM_PATH` com o caminho do executável. Sem Chromium, os testes que imprimem PDF são pulados e a exportação mostra um erro que diz o que fazer.
+
+## O bot com o resume-forge: um currículo por vaga
+
+Por padrão o bot anexa sempre o mesmo PDF (`apply.curriculo: "fixo"` em `apply-jobs/config.yaml`). Para anexar o PDF adaptado a cada vaga:
+
+1. Em `apply-jobs/config.yaml`, ponha `apply.curriculo: "forge"`.
+2. Rode o bot (`python main.py`). Vaga sem PDF exportado vira **Revisão manual**, sem abrir o formulário, com uma mensagem dizendo o que fazer.
+3. No painel (`/candidaturas`), abra a candidatura e use **Criar currículo adaptado a esta vaga**. Revise e exporte o PDF.
+4. Rode o bot de novo: ele acha o PDF mais recente pelo job id do LinkedIn e o anexa.
+
+Como a revisão é sua, o modo `auto` não gera currículo sozinho: vagas sem PDF esperam. O bot só lê as tabelas `forge_*`; quem as escreve é o resume-forge.

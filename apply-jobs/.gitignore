@@ -33,3 +33,4 @@ Thumbs.db
 # Gravação de snapshots e currículo local
 storage/gravacao/
 storage/curriculo.pdf
+storage/curriculos/
