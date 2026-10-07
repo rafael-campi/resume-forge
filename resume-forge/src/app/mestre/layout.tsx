@@ -23,6 +23,9 @@ export default async function LayoutMestre({ children }: { children: ReactNode }
               </Link>
             </li>
           ))}
+          <li>
+            <Link href="/mestre/importar"><span>Importar do LinkedIn</span></Link>
+          </li>
         </ul>
       </nav>
       <div className="conteudo">{children}</div>
