@@ -109,11 +109,19 @@ const LISTAS: Record<Exclude<Secao, "contato">, Lista> = {
   },
 };
 
-const paraMes = (d: { mes: number; ano: number } | null) => (d ? `${d.ano}-${String(d.mes).padStart(2, "0")}` : "");
-function deMes(v: string) {
-  const m = /^(\d{4})-(\d{2})$/.exec(v);
-  // anos parciais enquanto se digita (0002) contam como "ainda sem data"
-  return m && +m[1]! >= 1950 && +m[1]! <= 2100 ? { ano: +m[1]!, mes: +m[2]! } : null;
+// Texto cru MM/AAAA: funciona em qualquer navegador e não apaga o que se digita pela metade.
+function CampoMes({ id, valor, desabilitado, onChange }: { id: string; valor: { mes: number; ano: number } | null; desabilitado?: boolean; onChange: (v: { mes: number; ano: number } | null) => void }) {
+  const [texto, setTexto] = useState(valor ? `${String(valor.mes).padStart(2, "0")}/${valor.ano}` : "");
+  return (
+    <input id={id} type="text" inputMode="numeric" placeholder="MM/AAAA" maxLength={7} disabled={desabilitado}
+      value={desabilitado ? "" : texto}
+      onChange={(e) => {
+        setTexto(e.target.value);
+        const m = /^(\d{1,2})\/(\d{4})$/.exec(e.target.value.trim());
+        const mes = m ? +m[1]! : 0, ano = m ? +m[2]! : 0;
+        onChange(m && mes >= 1 && mes <= 12 && ano >= 1950 && ano <= 2100 ? { mes, ano } : null);
+      }} />
+  );
 }
 
 function CampoTags({ id, rotulo, valor, onChange, ajuda }: { id: string; rotulo: string; valor: string[]; onChange: (t: string[]) => void; ajuda?: string }) {
@@ -159,7 +167,7 @@ function CampoEditor({ campo, item, idBase, onChange }: { campo: Campo; item: It
       return (
         <div className="campo">
           <label htmlFor={id}>{campo.rotulo}</label>
-          <input id={id} type="month" value={paraMes(valor)} onChange={(e) => onChange({ [campo.chave]: deMes(e.target.value) })} />
+          <CampoMes id={id} valor={valor} onChange={(v) => onChange({ [campo.chave]: v })} />
         </div>
       );
     case "fim": {
@@ -167,7 +175,7 @@ function CampoEditor({ campo, item, idBase, onChange }: { campo: Campo; item: It
       return (
         <div className="campo">
           <label htmlFor={id}>{campo.rotulo}</label>
-          <input id={id} type="month" disabled={atual} value={atual ? "" : paraMes(valor)} onChange={(e) => onChange({ [campo.chave]: deMes(e.target.value) })} />
+          <CampoMes id={id} valor={atual ? null : valor} desabilitado={atual} onChange={(v) => onChange({ [campo.chave]: v })} />
           <label className="marca-inline">
             <input type="checkbox" checked={atual} onChange={(e) => onChange({ [campo.chave]: e.target.checked ? "atual" : null })} /> {campo.fimRotulo ?? "Atual"}
           </label>
